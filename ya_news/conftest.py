@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from django.conf import settings
+from django.utils import timezone
 
 from news.models import News, Comment
 
@@ -58,7 +59,7 @@ def comment_list(author, news):
             text=f'Текст комментария {i}',
             author=author,
             news=news,
-            created=(datetime.today() + timedelta(days=i))
+            created=(timezone.now() + timedelta(days=i))
         )
         comment_list.append(comment_item)
     return comment_list
