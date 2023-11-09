@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from notes.models import Note
@@ -16,8 +16,12 @@ class TestRoutes(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Автор')
+        cls.author = User.objects.create(username='Автор заметки')
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
         cls.reader = User.objects.create(username='Читатель')
+        cls.reader_client = Client()
+        cls.reader_client.force_login(cls.reader)
         cls.note = Note.objects.create(
             title=cls.TITLE,
             text=cls.TEXT,
@@ -55,10 +59,9 @@ class TestRoutes(TestCase):
             'notes:add',
         )
         for name in urls:
-            self.client.force_login(self.reader)
             with self.subTest(name=name):
                 url = reverse(name)
-                response = self.client.get(url)
+                response = self.reader_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_availability_for_different_users(self):
@@ -68,15 +71,14 @@ class TestRoutes(TestCase):
         зайти другой пользователь — вернётся ошибка 404.
         """
         users_statuses = (
-            (self.author, HTTPStatus.OK),
-            (self.reader, HTTPStatus.NOT_FOUND),
+            (self.author_client, HTTPStatus.OK),
+            (self.reader_client, HTTPStatus.NOT_FOUND),
         )
         for user, status in users_statuses:
-            self.client.force_login(user)
             for name in ('notes:edit', 'notes:delete', 'notes:detail'):
                 with self.subTest(user=user, name=name):
                     url = reverse(name, args=(self.note.slug,))
-                    response = self.client.get(url)
+                    response = user.get(url)
                     self.assertEqual(response.status_code, status)
 
     def test_redirects(self):
