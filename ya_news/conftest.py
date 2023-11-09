@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
-import pytest
 import time
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
+import pytest
 
-from news.models import News, Comment
+from news.models import Comment, News
 
 
 @pytest.fixture
@@ -68,12 +69,19 @@ def comment_list(author, news):
 
 
 @pytest.fixture
-def pk_for_args(news):
+def news_pk_for_args(news):
     return news.pk,
 
 
 @pytest.fixture
-def form_data():
+def form_data(author, news):
     return {
         'text': 'Новый текст',
+        'author': author,
+        'news': news,
     }
+
+
+@pytest.fixture
+def home_url():
+    return reverse('news:home')

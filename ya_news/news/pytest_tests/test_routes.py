@@ -1,7 +1,7 @@
 from http import HTTPStatus
-import pytest
 
 from django.urls import reverse
+import pytest
 from pytest_django.asserts import assertRedirects
 
 
@@ -13,7 +13,7 @@ from pytest_django.asserts import assertRedirects
         ('users:logout', None),
         ('users:signup', None),
         ('news:home', None),
-        ('news:detail', pytest.lazy_fixture('pk_for_args')),
+        ('news:detail', pytest.lazy_fixture('news_pk_for_args')),
     )
 )
 def test_pages_availability_for_anonymous_user(client, news, name, args):
@@ -23,8 +23,7 @@ def test_pages_availability_for_anonymous_user(client, news, name, args):
     6. Страницы регистрации пользователей, входа в учётную запись и выхода из
     неё доступны анонимным пользователям.
     """
-    url = reverse(name, args=args)
-    response = client.get(url)
+    response = client.get(reverse(name, args=args))
     assert response.status_code == HTTPStatus.OK
 
 
@@ -48,8 +47,7 @@ def test_pages_availability_for_different_users(
     5. Авторизованный пользователь не может зайти на страницы редактирования
     или удаления чужих комментариев (возвращается ошибка 404).
     """
-    url = reverse(name, args=(comment.pk,))
-    response = parametrized_client.get(url)
+    response = parametrized_client.get(reverse(name, args=(comment.pk,)))
     assert response.status_code == expected_status
 
 
@@ -65,8 +63,6 @@ def test_redirects(client, comment, name):
     4. При попытке перейти на страницу редактирования или удаления комментария
     анонимный пользователь перенаправляется на страницу авторизации.
     """
-    login_url = reverse('users:login')
     url = reverse(name, args=(comment.pk,))
-    expected_url = f'{login_url}?next={url}'
     response = client.get(url)
-    assertRedirects(response, expected_url)
+    assertRedirects(response, f'{reverse("users:login")}?next={url}')
