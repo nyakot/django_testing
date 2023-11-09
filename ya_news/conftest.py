@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import time
 
 from django.conf import settings
-from django.urls import reverse
 from django.utils import timezone
 import pytest
 
@@ -84,4 +83,19 @@ def form_data(author, news):
 
 @pytest.fixture
 def home_url():
-    return reverse('news:home')
+    return 'news:home'
+
+
+@pytest.fixture
+def login_url():
+    return 'users:login'
+
+
+@pytest.fixture
+def logout_url():
+    return 'users:logout'
+
+
+@pytest.fixture
+def signup_url():
+    return 'users:signup'

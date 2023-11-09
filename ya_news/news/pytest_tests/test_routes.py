@@ -9,10 +9,10 @@ from pytest_django.asserts import assertRedirects
 @pytest.mark.parametrize(
     'name, args',
     (
-        ('users:login', None),
-        ('users:logout', None),
-        ('users:signup', None),
-        ('news:home', None),
+        (pytest.lazy_fixture('login_url'), None),
+        (pytest.lazy_fixture('logout_url'), None),
+        (pytest.lazy_fixture('signup_url'), None),
+        (pytest.lazy_fixture('home_url'), None),
         ('news:detail', pytest.lazy_fixture('news_pk_for_args')),
     )
 )
@@ -58,11 +58,11 @@ def test_pages_availability_for_different_users(
         ('news:edit'),
     ),
 )
-def test_redirects(client, comment, name):
+def test_redirects(client, comment, name, login_url):
     """
     4. При попытке перейти на страницу редактирования или удаления комментария
     анонимный пользователь перенаправляется на страницу авторизации.
     """
     url = reverse(name, args=(comment.pk,))
     response = client.get(url)
-    assertRedirects(response, f'{reverse("users:login")}?next={url}')
+    assertRedirects(response, f'{reverse(login_url)}?next={url}')

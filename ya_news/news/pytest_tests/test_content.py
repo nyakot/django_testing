@@ -7,7 +7,7 @@ from django.urls import reverse
 @pytest.mark.django_db
 def test_news_count(client, news_list, home_url):
     """1. Количество новостей на главной странице — не более 10."""
-    response = client.get(home_url)
+    response = client.get(reverse(home_url))
     assert len(response
                .context['object_list']) == settings.NEWS_COUNT_ON_HOME_PAGE
 
@@ -18,7 +18,7 @@ def test_news_order(client, news_list, home_url):
     2. Новости отсортированы от самой свежей к самой старой.
     Свежие новости в начале списка.
     """
-    response = client.get(home_url)
+    response = client.get(reverse(home_url))
     all_dates = [news.date for news in response.context['object_list']]
     sorted_dates = sorted(all_dates, reverse=True)
     assert all_dates == sorted_dates
